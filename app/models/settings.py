@@ -12,14 +12,14 @@ class SettingsModel(BaseModel):
     """Pydantic model for Settings"""
     assembly_method: str = Field(default="bolt", description="طريقة التجميع")
     handle_type: str = Field(default="built-in", description="نوع المقبض")
-    handle_recess_height_cm: int = Field(default=3, description="ارتفاع قطاع المقبض بالسنتيمتر")
-    default_board_thickness_cm: int = Field(default=1.6, description="سمك الافتراضي للألواح بالسنتيمتر")
-    back_panel_thickness_cm: int = Field(default=0.3, description="سمك لوح الظهر بالسنتيمتر")
-    edge_overlap_cm: int = Field(default=0.2, description="مسافة التداخل للشريط بالسنتيمتر (للمفاصل)")
-    back_clearance_cm: int = Field(default=0.3, description="مسافة الفراغ من الخلف للرفوف (سم)")
-    top_clearance_cm: int = Field(default=0.5, description="المسافة العلوية للظهر (سم)")
-    bottom_clearance_cm: int = Field(default=0.5, description="المسافة السفلية للظهر (سم)")
-    side_overlap_cm: int = Field(default=0, description="تداخل الجوانب مع الظهر (سم)")
+    handle_recess_height_cm: float = Field(default=3, description="ارتفاع قطاع المقبض بالسنتيمتر")
+    default_board_thickness_cm: float = Field(default=1.6, description="سمك الافتراضي للألواح بالسنتيمتر")
+    back_panel_thickness_cm: float = Field(default=0.3, description="سمك لوح الظهر بالسنتيمتر")
+    edge_overlap_cm: float = Field(default=0.2, description="مسافة التداخل للشريط بالسنتيمتر (للمفاصل)")
+    back_clearance_cm: float = Field(default=0.3, description="مسافة الفراغ من الخلف للرفوف (سم)")
+    top_clearance_cm: float = Field(default=0.5, description="المسافة العلوية للظهر (سم)")
+    bottom_clearance_cm: float = Field(default=0.5, description="المسافة السفلية للظهر (سم)")
+    side_overlap_cm: float = Field(default=0, description="تداخل الجوانب مع الظهر (سم)")
     sheet_size_m2: float = Field(default=2.4, description="حجم اللوح بالمتر المربع")
     materials: Dict[str, MaterialPrice] = Field(
         default_factory=lambda: {
