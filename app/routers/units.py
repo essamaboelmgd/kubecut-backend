@@ -236,16 +236,21 @@ async def estimate_unit_cost(request: UnitEstimateRequest, authorization: str = 
         
         # Calculate cost based on materials
         total_cost = 0.0
+        plywood_cost = 0.0
+        edge_band_cost = 0.0
+        
         if settings.materials.get("plywood_sheet"):
             plywood = settings.materials["plywood_sheet"]
             if plywood.price_per_sheet and material_usage.get("ألواح الخشب"):
-                total_cost += (material_usage["ألواح الخشب"] * plywood.price_per_sheet)
+                plywood_cost = material_usage["ألواح الخشب"] * plywood.price_per_sheet
+                total_cost += plywood_cost
         
         # Calculate edge band cost
         if total_edge_meters and settings.materials.get("edge_band_per_meter"):
             edge_band = settings.materials["edge_band_per_meter"]
             if edge_band.price_per_meter and material_usage.get("شريط الحافة"):
-                total_cost += (material_usage["شريط الحافة"] * edge_band.price_per_meter)
+                edge_band_cost = material_usage["شريط الحافة"] * edge_band.price_per_meter
+                total_cost += edge_band_cost
         
         # Convert to cm for response
         return UnitEstimateResponse(
@@ -260,8 +265,8 @@ async def estimate_unit_cost(request: UnitEstimateRequest, authorization: str = 
             total_area_m2=total_area,
             material_usage=material_usage,
             cost_breakdown={
-                "ألواح الخشب": material_usage.get("ألواح الخشب", 0) * (settings.materials.get("plywood_sheet", {}).get("price_per_sheet", 0) if settings.materials.get("plywood_sheet") else 0),
-                "شريط الحافة": material_usage.get("شريط الحافة", 0) * (settings.materials.get("edge_band_per_meter", {}).get("price_per_meter", 0) if settings.materials.get("edge_band_per_meter") else 0)
+                "ألواح الخشب": plywood_cost,
+                "شريط الحافة": edge_band_cost
             },
             total_cost=total_cost
         )
@@ -412,16 +417,21 @@ async def save_unit(request: UnitCalculateRequest, authorization: str = Header(N
         
         # Calculate cost based on materials
         total_cost = 0.0
+        plywood_cost = 0.0
+        edge_band_cost = 0.0
+        
         if settings.materials.get("plywood_sheet"):
             plywood = settings.materials["plywood_sheet"]
             if plywood.price_per_sheet and material_usage.get("ألواح الخشب"):
-                total_cost += (material_usage["ألواح الخشب"] * plywood.price_per_sheet)
+                plywood_cost = material_usage["ألواح الخشب"] * plywood.price_per_sheet
+                total_cost += plywood_cost
         
         # Calculate edge band cost
         if total_edge_meters and settings.materials.get("edge_band_per_meter"):
             edge_band = settings.materials["edge_band_per_meter"]
             if edge_band.price_per_meter and material_usage.get("شريط الحافة"):
-                total_cost += (material_usage["شريط الحافة"] * edge_band.price_per_meter)
+                edge_band_cost = material_usage["شريط الحافة"] * edge_band.price_per_meter
+                total_cost += edge_band_cost
         
         # Create unit document (store in cm)
         unit_id = str(uuid.uuid4())
@@ -438,8 +448,8 @@ async def save_unit(request: UnitCalculateRequest, authorization: str = Header(N
             "material_usage": material_usage,
             "price_estimate": total_cost,
             "cost_breakdown": {
-                "ألواح الخشب": material_usage.get("ألواح الخشب", 0) * (settings.materials.get("plywood_sheet", {}).get("price_per_sheet", 0) if settings.materials.get("plywood_sheet") else 0),
-                "شريط الحافة": material_usage.get("شريط الحافة", 0) * (settings.materials.get("edge_band_per_meter", {}).get("price_per_meter", 0) if settings.materials.get("edge_band_per_meter") else 0)
+                "ألواح الخشب": plywood_cost,
+                "شريط الحافة": edge_band_cost
             },
             "created_by": token_data.user_id,  # Track who created the unit
             "created_at": datetime.utcnow(),
