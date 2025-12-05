@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Query, Depends, Header
+from fastapi import APIRouter, HTTPException, status, Query, Depends, Header, Response
 from typing import List, Optional, Dict
 import uuid
 from datetime import datetime
@@ -38,6 +38,8 @@ from app.services.auth_service import (
 )
 import jwt
 from app.services.auth_service import SECRET_KEY, ALGORITHM
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill
 
 router = APIRouter()
 
@@ -661,4 +663,146 @@ async def get_edge_breakdown(unit_id: str, edge_type: Optional[str] = None):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error calculating edge breakdown: {str(e)}"
+        )
+
+@router.get("/{unit_id}/export-excel", response_class=Response)
+async def export_unit_to_excel(unit_id: str, authorization: str = Header(None)):
+    """
+    تصدير تفاصيل الوحدة إلى ملف Excel
+    
+    Parameters:
+    - unit_id: str - معرف الوحدة
+    - authorization: Header - توكن المستخدم
+    
+    Returns:
+    - Excel file with unit parts details
+    """
+    try:
+        # Extract token from Authorization header
+        if authorization and authorization.startswith("Bearer "):
+            token = authorization[len("Bearer "):]
+            try:
+                token_data = await get_current_user_from_token(token)
+            except:
+                # If token is invalid, continue without user tracking
+                pass
+        
+        db = get_database()
+        if db is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database connection not available"
+            )
+        
+        units_collection = db.units
+        unit_doc = await units_collection.find_one({"_id": unit_id})
+        
+        if unit_doc is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Unit not found"
+            )
+        
+        # Get settings for cost calculation
+        settings = await get_settings_model()
+        
+        # Convert database document to response format
+        response_data = unit_doc.copy()
+        
+        # Map database field names to response field names
+        if "_id" in response_data:
+            response_data["unit_id"] = str(response_data["_id"])
+            del response_data["_id"]
+        
+        if "parts_calculated" in response_data:
+            # Convert parts_calculated to Part objects
+            from app.models.units import Part
+            parts = [Part(**part_data) for part_data in response_data["parts_calculated"]]
+        else:
+            parts = []
+        
+        # Create Excel workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "تفاصيل الوحدة"
+        
+        # Set column headers with styling
+        headers = ["اسم القطعة", "العرض (سم)", "الارتفاع (سم)", "الكمية", "المساحة (م²)", "طول الحافة (م)"]
+        ws.append(headers)
+        
+        # Style the header row
+        header_font = Font(bold=True)
+        header_fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
+        header_alignment = Alignment(horizontal="center")
+        
+        for col in range(1, len(headers) + 1):
+            cell = ws.cell(row=1, column=col)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+        
+        # Add data rows
+        total_qty = 0
+        total_area = 0.0
+        total_edge = 0.0
+        
+        for part in parts:
+            row = [
+                part.name,
+                part.width_cm,
+                part.height_cm,
+                part.qty,
+                round(part.area_m2, 2) if part.area_m2 else 0,
+                round(part.edge_band_m, 2) if part.edge_band_m else 0
+            ]
+            ws.append(row)
+            
+            # Update totals
+            total_qty += part.qty
+            total_area += part.area_m2 or 0
+            total_edge += part.edge_band_m or 0
+        
+        # Add totals row
+        totals_row = ["المجموع", "", "", total_qty, round(total_area, 2), round(total_edge, 2)]
+        ws.append(totals_row)
+        
+        # Style the totals row
+        totals_font = Font(bold=True)
+        for col in range(1, len(totals_row) + 1):
+            cell = ws.cell(row=ws.max_row, column=col)
+            cell.font = totals_font
+        
+        # Auto-adjust column widths
+        for column in ws.columns:
+            max_length = 0
+            column_letter = column[0].column_letter
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Save to bytes
+        from io import BytesIO
+        excel_buffer = BytesIO()
+        wb.save(excel_buffer)
+        excel_buffer.seek(0)
+        
+        # Return Excel file as response
+        headers = {
+            "Content-Disposition": f"attachment; filename=unit_details_{unit_id}.xlsx",
+            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+        
+        return Response(content=excel_buffer.getvalue(), headers=headers)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error exporting unit to Excel: {str(e)}"
         )
