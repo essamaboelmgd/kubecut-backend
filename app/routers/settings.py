@@ -51,7 +51,15 @@ async def get_settings():
         settings_doc = await get_settings_from_db()
         # Remove _id from response
         settings_doc.pop("_id", None)
-        return SettingsModel(**settings_doc)
+        
+        try:
+            return SettingsModel(**settings_doc)
+        except Exception as validation_error:
+            # If DB data is invalid/outdated, log it and return defaults
+            # This prevents 500 error and allows user to re-save valid settings
+            print(f"WARNING: Settings validation failed: {validation_error}. Returning defaults.")
+            return SettingsModel()
+            
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
