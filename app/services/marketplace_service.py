@@ -31,10 +31,18 @@ class MarketplaceService:
         await self.collection.insert_one(item_doc.model_dump(by_alias=True))
         return item_doc
 
-    async def get_items(self, status: Optional[ItemStatus] = ItemStatus.AVAILABLE, skip: int = 0, limit: int = 20) -> List[MarketplaceItemDocument]:
+    async def get_items(self, status: Optional[ItemStatus] = ItemStatus.AVAILABLE, search_query: str = None, skip: int = 0, limit: int = 20) -> List[MarketplaceItemDocument]:
         query = {}
         if status:
             query["status"] = status
+            
+        if search_query:
+            # Case-insensitive search on title or description
+            regex = {"$regex": search_query, "$options": "i"}
+            query["$or"] = [
+                {"title": regex},
+                {"description": regex}
+            ]
             
         cursor = self.collection.find(query).skip(skip).limit(limit).sort("created_at", -1)
         items = []
@@ -44,6 +52,15 @@ class MarketplaceService:
 
     async def get_items_by_buyer(self, buyer_id: str, skip: int = 0, limit: int = 20) -> List[MarketplaceItemDocument]:
         query = {"buyer_id": buyer_id, "status": ItemStatus.SOLD}
+        cursor = self.collection.find(query).skip(skip).limit(limit).sort("updated_at", -1)
+        items = []
+        async for doc in cursor:
+            items.append(MarketplaceItemDocument(**doc))
+        return items
+
+    async def get_items_by_seller(self, seller_id: str, skip: int = 0, limit: int = 20) -> List[MarketplaceItemDocument]:
+        # Get items sold by this seller
+        query = {"seller_id": seller_id, "status": {"$in": [ItemStatus.SOLD, ItemStatus.PENDING]}}
         cursor = self.collection.find(query).skip(skip).limit(limit).sort("updated_at", -1)
         items = []
         async for doc in cursor:
@@ -74,7 +91,7 @@ class MarketplaceService:
             return await self.get_item_by_id(item_id)
         return item
 
-    async def buy_item(self, item_id: str, buyer_id: str) -> MarketplaceItemDocument:
+    async def buy_item(self, item_id: str, buyer_id: str, quantity: int = 1) -> MarketplaceItemDocument:
         item = await self.get_item_by_id(item_id)
         if not item:
             raise HTTPException(status_code=404, detail="Item not found")
@@ -82,24 +99,92 @@ class MarketplaceService:
         if item.status != ItemStatus.AVAILABLE:
             raise HTTPException(status_code=400, detail="Item is not available for sale")
             
+        if item.quantity < quantity:
+            raise HTTPException(status_code=400, detail=f"Not enough stock. Available: {item.quantity}")
+
         if item.seller_id == buyer_id:
             raise HTTPException(status_code=400, detail="Cannot buy your own item")
 
+        # atomic update to decrement quantity
         update_result = await self.collection.update_one(
-            {"_id": item_id, "status": ItemStatus.AVAILABLE}, # Atomic check
+            {"_id": item_id, "status": ItemStatus.AVAILABLE, "quantity": {"$gte": quantity}},
             {
-                "$set": {
-                    "status": ItemStatus.SOLD,
-                    "buyer_id": buyer_id,
-                    "updated_at": datetime.utcnow()
-                }
+                "$inc": {"quantity": -quantity},
+                "$set": {"updated_at": datetime.utcnow()}
             }
         )
         
         if update_result.modified_count == 0:
-             raise HTTPException(status_code=409, detail="Item was just sold to someone else")
+             raise HTTPException(status_code=409, detail="Item stock changed or item no longer available")
+        
+        # Create a new "Sold/Pending" item record to represent this transaction
+        # This preserves the original listing while creating a record for the sale
+        sold_item_doc = MarketplaceItemDocument(
+            _id=str(uuid4()),
+            seller_id=item.seller_id,
+            buyer_id=buyer_id,
+            title=item.title,
+            description=item.description,
+            price=item.price * quantity, # Total price for this transaction
+            quantity=quantity,
+            unit=item.unit,
+            images=item.images,
+            status=ItemStatus.PENDING,
+            location=item.location,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+        
+        await self.collection.insert_one(sold_item_doc.model_dump(by_alias=True))
              
+        return sold_item_doc
+
+    async def accept_order(self, item_id: str, seller_id: str) -> MarketplaceItemDocument:
+        item = await self.get_item_by_id(item_id)
+        if not item or item.seller_id != seller_id:
+             raise HTTPException(status_code=404, detail="Item not found or unauthorized")
+        
+        if item.status != ItemStatus.PENDING:
+             raise HTTPException(status_code=400, detail="Item is not pending approval")
+
+        await self.collection.update_one(
+            {"_id": item_id},
+            {"$set": {"status": ItemStatus.SOLD, "updated_at": datetime.utcnow()}}
+        )
         return await self.get_item_by_id(item_id)
+
+    async def deny_order(self, item_id: str, seller_id: str) -> MarketplaceItemDocument:
+        item = await self.get_item_by_id(item_id)
+        if not item or item.seller_id != seller_id:
+             raise HTTPException(status_code=404, detail="Item not found or unauthorized")
+        
+        if item.status != ItemStatus.PENDING:
+             raise HTTPException(status_code=400, detail="Item is not pending approval")
+
+        await self.collection.update_one(
+            {"_id": item_id},
+            {"$set": {"status": ItemStatus.AVAILABLE, "buyer_id": None, "updated_at": datetime.utcnow()}}
+        )
+        return await self.get_item_by_id(item_id)
+
+    async def get_buyer_details(self, item_id: str, seller_id: str) -> dict:
+        item = await self.get_item_by_id(item_id)
+        if not item or item.seller_id != seller_id:
+             raise HTTPException(status_code=404, detail="Item not found or unauthorized")
+             
+        if item.status != ItemStatus.SOLD:
+             raise HTTPException(status_code=400, detail="Can only view buyer details for accepted orders")
+             
+        # Fetch buyer info from users collection
+        buyer = await self.db.users.find_one({"_id": item.buyer_id})
+        if not buyer:
+             return {"name": "Unknown", "phone": "Unknown"}
+             
+        return {
+            "name": buyer.get("full_name"),
+            "phone": buyer.get("phone"),
+            "email": buyer.get("email")
+        }
 
     async def delete_item(self, item_id: str, user_id: str) -> bool:
         item = await self.get_item_by_id(item_id)
@@ -114,5 +199,5 @@ class MarketplaceService:
 
 # Helper to get service instance
 async def get_marketplace_service() -> MarketplaceService:
-    db = await get_database()
+    db = get_database()
     return MarketplaceService(db)

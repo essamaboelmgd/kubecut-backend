@@ -1,81 +1,155 @@
 from pydantic import BaseModel, Field
-from typing import Dict, Optional
+from typing import Optional, Dict
 from datetime import datetime
+from enum import Enum
 
-class MaterialPrice(BaseModel):
+class AssemblyMethod(str, Enum):
+    """طريقة التجميع"""
+    FULL_SIDES_BACK_ROUTED = "full_sides_back_routed"  # جانبين كاملين (ظهر مفحار)
+    FULL_BASE_BACK_ROUTED = "full_base_back_routed"  # أرضية كاملة ظهر مفحار
+    BASE_FULL_TOP_SIDES_BACK_ROUTED = "base_full_top_sides_back_routed"  # ارضي (قاعدة كاملة) +علوي(جانبين كاملين) ظهر مفحار
+    FULL_SIDES_BACK_FLUSH = "full_sides_back_flush"  # جانبين كاملين (ظهر لطش)
+    FULL_BASE_BACK_FLUSH = "full_base_back_flush"  # أرضية كاملة (ظهر لطش)
+    BASE_FULL_TOP_SIDES_BACK_FLUSH = "base_full_top_sides_back_flush"  # ارضي (قاعدة كاملة) +علوي(جانبين كاملين) ظهر لطش
+
+class HandleType(str, Enum):
+    """نوع المقبض"""
+    BUILT_IN = "built_in"  # مقبض بيلت ان
+    REGULAR = "regular"  # مقبض عادي
+    HIDDEN_CL_CHASSIS = "hidden_cl_chassis"  # مقبض ارضي مخفي ( C-L ) علوي شاسية
+    HIDDEN_CL_DROP = "hidden_cl_drop"  # مقبض ارضي مخفي ( C-L ) علوي ساقط
+
+class MaterialInfo(BaseModel):
+    """معلومات الخامة"""
     price_per_sheet: Optional[float] = None
     sheet_size_m2: Optional[float] = None
     price_per_meter: Optional[float] = None
-    price_per_unit: Optional[float] = None
+    description: Optional[str] = None
 
 class SettingsModel(BaseModel):
-    """Pydantic model for Settings"""
-    assembly_method: str = Field(default="bolt", description="طريقة التجميع")
-    handle_type: str = Field(default="built-in", description="نوع المقبض")
-    handle_recess_height_cm: float = Field(default=3, description="ارتفاع قطاع المقبض بالسنتيمتر")
-    default_board_thickness_cm: float = Field(default=1.6, description="سمك الافتراضي للألواح بالسنتيمتر")
-    back_panel_thickness_cm: float = Field(default=0.3, description="سمك لوح الظهر بالسنتيمتر")
-    edge_overlap_cm: float = Field(default=0.2, description="مسافة التداخل للشريط بالسنتيمتر (للمفاصل)")
-    back_clearance_cm: float = Field(default=0.3, description="مسافة الفراغ من الخلف للرفوف (سم)")
-    top_clearance_cm: float = Field(default=0.5, description="المسافة العلوية للظهر (سم)")
-    bottom_clearance_cm: float = Field(default=0.5, description="المسافة السفلية للظهر (سم)")
-    side_overlap_cm: float = Field(default=0, description="تداخل الجوانب مع الظهر (سم)")
-    sheet_size_m2: float = Field(default=2.4, description="حجم اللوح بالمتر المربع")
-    materials: Dict[str, MaterialPrice] = Field(
-        default_factory=lambda: {
-            "plywood_sheet": MaterialPrice(
-                price_per_sheet=400,  # Changed from 2500 SAR to 400 EGP
-                sheet_size_m2=2.4
-            ),
-            "edge_band_per_meter": MaterialPrice(
-                price_per_meter=20  # Changed from 10 SAR to 20 EGP
-            )
-        },
+    """نموذج إعدادات التقطيع والتجميع"""
+    
+    # طريقة التجميع
+    assembly_method: AssemblyMethod = Field(
+        default=AssemblyMethod.FULL_SIDES_BACK_ROUTED,
+        description="طريقة التجميع"
+    )
+    
+    # نوع المقبض
+    handle_type: HandleType = Field(
+        default=HandleType.BUILT_IN,
+        description="نوع المقبض"
+    )
+    
+    # ارتفاع قطاع المقبض (بيلت ان \ C &L)
+    handle_profile_height: float = Field(
+        default=3.5,
+        description="ارتفاع قطاع المقبض (بيلت ان \\ C &L) بالسنتيمتر"
+    )
+    
+    # مقبض الشاسية (الوحدات العلوية) / سقوط الضلفة
+    chassis_handle_drop: float = Field(
+        default=2.0,
+        description="مقبض الشاسية (الوحدات العلوية) / سقوط الضلفة بالسنتيمتر"
+    )
+    
+    # سمك لوح الكونتر
+    counter_thickness: float = Field(
+        default=1.8,
+        description="سمك لوح الكونتر بالسنتيمتر"
+    )
+    
+    # عرض المراية
+    mirror_width: float = Field(
+        default=8.0,
+        description="عرض المراية بالسنتيمتر"
+    )
+    
+    # تخصيم الظهر
+    back_deduction: float = Field(
+        default=2.0,
+        description="تخصيم الظهر بالسنتيمتر"
+    )
+    
+    # عمق المفحار
+    router_depth: float = Field(
+        default=0.9,
+        description="عمق المفحار بالسنتيمتر"
+    )
+    
+    # بعد المفحار
+    router_distance: float = Field(
+        default=2.0,
+        description="بعد المفحار بالسنتيمتر"
+    )
+    
+    # سمك المفحار
+    router_thickness: float = Field(
+        default=0.5,
+        description="سمك المفحار بالسنتيمتر"
+    )
+    
+    # تخصيم عرض الضلفة بدون الشريط
+    door_width_deduction_no_edge: float = Field(
+        default=0.4,
+        description="تخصيم عرض الضلفة بدون الشريط بالسنتيمتر"
+    )
+    
+    # تخصيم الرف من العمق
+    shelf_depth_deduction: float = Field(
+        default=5.0,
+        description="تخصيم الرف من العمق بالسنتيمتر"
+    )
+    
+    # تخصيم ارتفاع الضلفة الارضي بدون الشريط
+    ground_door_height_deduction_no_edge: float = Field(
+        default=1.0,
+        description="تخصيم ارتفاع الضلفة الارضي بدون الشريط بالسنتيمتر"
+    )
+    
+    # هدر مكنة لصق الشريط لكل مقاس
+    edge_banding_waste_per_size: float = Field(
+        default=6.0,
+        description="هدر مكنة لصق الشريط لكل مقاس بالسنتيمتر"
+    )
+    
+    # أسعار الخامات
+    materials: Dict[str, MaterialInfo] = Field(
+        default_factory=dict,
         description="أسعار الخامات"
     )
-    edge_types: Dict[str, str] = Field(
-        default_factory=lambda: {"pvc": "PVC", "wood": "خشبي", "no_edge": "بدون شريط"},
-        description="أنواع الحواف المتاحة"
+
+    # تاريخ آخر تحديث
+    last_updated: Optional[datetime] = Field(
+        default=None,
+        description="تاريخ آخر تحديث"
     )
-    default_unit_depth_by_type: Dict[str, int] = Field(
-        default_factory=lambda: {"ground": 30, "wall": 25, "tall": 35, "sink_ground": 32},
-        description="العمق الافتراضي حسب نوع الوحدة (سم)"
-    )
-    last_updated: Optional[datetime] = Field(default=None, description="تاريخ آخر تحديث")
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "assembly_method": "bolt",
-                "handle_type": "built-in",
-                "handle_recess_height_cm": 3,
-                "default_board_thickness_cm": 1.6,
-                "back_panel_thickness_cm": 0.3,
-                "edge_overlap_cm": 0.2,
-                "back_clearance_cm": 0.3,
-                "top_clearance_cm": 0.5,
-                "bottom_clearance_cm": 0.5,
-                "side_overlap_cm": 0,
-                "sheet_size_m2": 2.4,
+                "assembly_method": "full_sides_back_routed",
+                "handle_type": "built_in",
+                "handle_profile_height": 3.5,
+                "chassis_handle_drop": 2.0,
+                "counter_thickness": 1.8,
+                "mirror_width": 8.0,
+                "back_deduction": 2.0,
+                "router_depth": 0.9,
+                "router_distance": 2.0,
+                "router_thickness": 0.5,
+                "door_width_deduction_no_edge": 0.4,
+                "shelf_depth_deduction": 5.0,
+                "ground_door_height_deduction_no_edge": 1.0,
+                "edge_banding_waste_per_size": 6.0,
                 "materials": {
                     "plywood_sheet": {
-                        "price_per_sheet": 2500,
-                        "sheet_size_m2": 2.4
+                        "price_per_sheet": 1200,
+                        "sheet_size_m2": 2.98
                     },
                     "edge_band_per_meter": {
-                        "price_per_meter": 10
+                        "price_per_meter": 5
                     }
-                },
-                "edge_types": {
-                    "pvc": "PVC",
-                    "wood": "خشبي",
-                    "no_edge": "بدون شريط"
-                },
-                "default_unit_depth_by_type": {
-                    "ground": 30,
-                    "wall": 25,
-                    "tall": 35,
-                    "sink_ground": 32
                 }
             }
         }
@@ -83,29 +157,21 @@ class SettingsModel(BaseModel):
 
 class SettingsUpdate(BaseModel):
     """
-    Model for updating settings
-    
-    جميع الحقول Optional للسماح بالتحديث الجزئي.
-    كل حقل يجب أن يطابق نوع البيانات في SettingsModel.
+    نموذج تحديث الإعدادات
+    جميع الحقول Optional للسماح بالتحديث الجزئي
     """
-    # الحقول الأساسية
-    assembly_method: Optional[str] = Field(default=None, description="طريقة التجميع")
-    handle_type: Optional[str] = Field(default=None, description="نوع المقبض")
-    handle_recess_height_cm: Optional[int] = Field(default=None, description="ارتفاع قطاع المقبض بالسنتيمتر")
-    default_board_thickness_cm: Optional[int] = Field(default=None, description="سمك الافتراضي للألواح بالسنتيمتر")
-    
-    # الحقول المتعلقة بالقياسات
-    back_panel_thickness_cm: Optional[int] = Field(default=None, description="سمك لوح الظهر بالسنتيمتر")
-    edge_overlap_cm: Optional[int] = Field(default=None, description="مسافة التداخل للشريط بالسنتيمتر (للمفاصل)")
-    back_clearance_cm: Optional[int] = Field(default=None, description="مسافة الفراغ من الخلف للرفوف (سم)")
-    top_clearance_cm: Optional[int] = Field(default=None, description="المسافة العلوية للظهر (سم)")
-    bottom_clearance_cm: Optional[int] = Field(default=None, description="المسافة السفلية للظهر (سم)")
-    side_overlap_cm: Optional[int] = Field(default=None, description="تداخل الجوانب مع الظهر (سم)")
-    sheet_size_m2: Optional[float] = Field(default=None, description="حجم اللوح بالمتر المربع")
-    
-    # الحقول المعقدة
-    materials: Optional[Dict[str, MaterialPrice]] = Field(default=None, description="أسعار الخامات")
-    edge_types: Optional[Dict[str, str]] = Field(default=None, description="أنواع الحواف المتاحة")
-    default_unit_depth_by_type: Optional[Dict[str, int]] = Field(default=None, description="العمق الافتراضي حسب نوع الوحدة (سم)")
-    
-    # ملاحظة: last_updated لا يُحدّث يدوياً، يتم تحديثه تلقائياً في الـ router
+    assembly_method: Optional[AssemblyMethod] = Field(default=None, description="طريقة التجميع")
+    handle_type: Optional[HandleType] = Field(default=None, description="نوع المقبض")
+    handle_profile_height: Optional[float] = Field(default=None, description="ارتفاع قطاع المقبض")
+    chassis_handle_drop: Optional[float] = Field(default=None, description="مقبض الشاسية / سقوط الضلفة")
+    counter_thickness: Optional[float] = Field(default=None, description="سمك لوح الكونتر")
+    mirror_width: Optional[float] = Field(default=None, description="عرض المراية")
+    back_deduction: Optional[float] = Field(default=None, description="تخصيم الظهر")
+    router_depth: Optional[float] = Field(default=None, description="عمق المفحار")
+    router_distance: Optional[float] = Field(default=None, description="بعد المفحار")
+    router_thickness: Optional[float] = Field(default=None, description="سمك المفحار")
+    door_width_deduction_no_edge: Optional[float] = Field(default=None, description="تخصيم عرض الضلفة بدون الشريط")
+    shelf_depth_deduction: Optional[float] = Field(default=None, description="تخصيم الرف من العمق")
+    ground_door_height_deduction_no_edge: Optional[float] = Field(default=None, description="تخصيم ارتفاع الضلفة الارضي بدون الشريط")
+    edge_banding_waste_per_size: Optional[float] = Field(default=None, description="هدر مكنة لصق الشريط لكل مقاس")
+    materials: Optional[Dict[str, MaterialInfo]] = Field(default=None, description="أسعار الخامات")

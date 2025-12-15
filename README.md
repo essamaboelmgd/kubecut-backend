@@ -41,6 +41,7 @@ Backend API for calculating kitchen cabinet dimensions and costs using FastAPI a
 ### Using Docker (Recommended)
 
 1. Build and run with Docker Compose:
+
 ```bash
 docker-compose up --build
 ```
@@ -50,17 +51,20 @@ The API will be available at `http://localhost:8000`
 ### Manual Setup
 
 1. Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 2. Set environment variables (create `.env` file):
+
 ```
 MONGODB_URL=mongodb://admin:admin123@localhost:27017/?authSource=admin
 DATABASE_NAME=kitchen_db
 ```
 
 3. Run the application:
+
 ```bash
 uvicorn app.main:app --reload
 ```
@@ -93,6 +97,7 @@ uvicorn app.main:app --reload
 ## API Documentation
 
 Once the server is running, visit:
+
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
@@ -208,6 +213,7 @@ GET /units/{unit_id}/edge-breakdown?edge_type=pvc
 ```
 
 Returns detailed edge band distribution for all parts:
+
 - Edge details (top, bottom, left, right)
 - Length in mm and meters
 - Edge type (wood/PVC)
@@ -234,6 +240,7 @@ POST /summaries/generate
 ```
 
 Returns comprehensive summary:
+
 - List of all parts with dimensions and quantities
 - Total area and edge band meters
 - Material usage
@@ -244,27 +251,60 @@ Returns comprehensive summary:
 
 ### Settings Schema
 
-The settings collection stores global application configuration:
+The settings collection stores global application configuration for cutting and assembly:
 
 ```json
 {
-  "assembly_method": "bolt",
-  "handle_type": "built-in",
-  "handle_recess_height_mm": 30,
-  "default_board_thickness_mm": 16,
-  "edge_overlap_mm": 2,
-  "materials": {
-    "plywood_sheet": {
-      "price_per_sheet": 2500,
-      "sheet_size_m2": 2.4
-    },
-    "edge_band_per_meter": {
-      "price_per_meter": 10
-    }
-  },
-  "last_updated": "2025-01-21T..."
+  "assembly_method": "full_sides_back_routed",
+  "handle_type": "built_in",
+  "handle_profile_height": 3.5,
+  "chassis_handle_drop": 2.0,
+  "counter_thickness": 1.8,
+  "mirror_width": 8.0,
+  "back_deduction": 2.0,
+  "router_depth": 0.9,
+  "router_distance": 2.0,
+  "router_thickness": 0.5,
+  "door_width_deduction_no_edge": 0.4,
+  "shelf_depth_deduction": 5.0,
+  "ground_door_height_deduction_no_edge": 1.0,
+  "edge_banding_waste_per_size": 6.0,
+  "last_updated": "2025-12-12T..."
 }
 ```
+
+#### Assembly Methods (طريقة التجميع)
+
+- `full_sides_back_routed` - جانبين كاملين (ظهر مفحار)
+- `full_base_back_routed` - أرضية كاملة ظهر مفحار
+- `base_full_top_sides_back_routed` - ارضي (قاعدة كاملة) +علوي(جانبين كاملين) ظهر مفحار
+- `full_sides_back_flush` - جانبين كاملين (ظهر لطش)
+- `full_base_back_flush` - أرضية كاملة (ظهر لطش)
+- `base_full_top_sides_back_flush` - ارضي (قاعدة كاملة) +علوي(جانبين كاملين) ظهر لطش
+
+#### Handle Types (نوع المقبض)
+
+- `built_in` - مقبض بيلت ان
+- `regular` - مقبض عادي
+- `hidden_cl_chassis` - مقبض ارضي مخفي ( C-L ) علوي شاسية
+- `hidden_cl_drop` - مقبض ارضي مخفي ( C-L ) علوي ساقط
+
+#### Numeric Settings (all in cm)
+
+| Setting                                | Arabic Name                                  | Default |
+| -------------------------------------- | -------------------------------------------- | ------- |
+| `handle_profile_height`                | ارتفاع قطاع المقبض (بيلت ان \ C &L)          | 3.5     |
+| `chassis_handle_drop`                  | مقبض الشاسية (الوحدات العلوية) / سقوط الضلفة | 2.0     |
+| `counter_thickness`                    | سمك لوح الكونتر                              | 1.8     |
+| `mirror_width`                         | عرض المراية                                  | 8.0     |
+| `back_deduction`                       | تخصيم الظهر                                  | 2.0     |
+| `router_depth`                         | عمق المفحار                                  | 0.9     |
+| `router_distance`                      | بعد المفحار                                  | 2.0     |
+| `router_thickness`                     | سمك المفحار                                  | 0.5     |
+| `door_width_deduction_no_edge`         | تخصيم عرض الضلفة بدون الشريط                 | 0.4     |
+| `shelf_depth_deduction`                | تخصيم الرف من العمق                          | 5.0     |
+| `ground_door_height_deduction_no_edge` | تخصيم ارتفاع الضلفة الارضي بدون الشريط       | 1.0     |
+| `edge_banding_waste_per_size`          | هدر مكنة لصق الشريط لكل مقاس                 | 6.0     |
 
 ### Unit Schema
 
@@ -342,4 +382,3 @@ The unit_summaries collection stores comprehensive unit summaries:
   "generated_at": "2025-01-21T..."
 }
 ```
-

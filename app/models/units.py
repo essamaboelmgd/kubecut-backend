@@ -1,14 +1,79 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Literal, Any
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
 
 class UnitType(str, Enum):
-    """نوع الوحدة"""
-    GROUND = "ground"  # أرضي
+    """أنواع الوحدات - 42 نوع"""
+    # وحدات أرضية
+    GROUND = "ground"  # ارضي
+    GROUND_SIDE_PANEL = "ground_side_panel"  # ارضي بها جنب عيرة
+    GROUND_FIXED = "ground_fixed"  # ارضي ثابت
+    GROUND_FIXED_SIDE_PANEL = "ground_fixed_side_panel"  # ارضي ثابت بها جنب عيرة
+    
+    # وحدات حوض
+    SINK = "sink"  # حوض
+    SINK_SIDE_PANEL = "sink_side_panel"  # حوض بها جنب عيرة
+    SINK_FIXED = "sink_fixed"  # حوض ثابت
+    SINK_FIXED_SIDE_PANEL = "sink_fixed_side_panel"  # حوض ثابت بها جنب عيرة
+    
+    # وحدات أدراج
+    DRAWERS = "drawers"  # ادراج
+    DRAWERS_SIDE_PANEL = "drawers_side_panel"  # ادراج بها جنب عيرة
+    DRAWERS_BOTTOM_RAIL = "drawers_bottom_rail"  # ادراج مجرة سفلية
+    DRAWERS_BOTTOM_RAIL_SIDE_PANEL = "drawers_bottom_rail_side_panel"  # ادراج مجرة سفلية بها جنب عيرة
+    
+    # وحدات ركنة أرضية
+    CORNER_90_GROUND = "corner_90_ground"  # ركنة 90 ارضي متساوية الاضلع
+    CORNER_45_GROUND = "corner_45_ground"  # ركنة 45 ارضي
+    
+    # وحدات علوية
     WALL = "wall"  # علوي
-    DOUBLE_DOOR = "double_door"  # ضلفتين
-    SINK_GROUND = "sink_ground"  # أرضي بحوض
+    WALL_SIDE_PANEL = "wall_side_panel"  # علوي بها جنب عيرة
+    WALL_FIXED = "wall_fixed"  # علوي ثابت
+    WALL_FIXED_SIDE_PANEL = "wall_fixed_side_panel"  # علوي ثابت بها جنب عيرة
+    WALL_FLIP_TOP_DOORS_BOTTOM = "wall_flip_top_doors_bottom"  # علوي ضلفة قلاب علوية +ضلف سفلية
+    
+    # وحدات صفاية
+    DISH_RACK = "dish_rack"  # صفاية
+    DISH_RACK_SIDE_PANEL = "dish_rack_side_panel"  # صفاية بها جنب عيرة
+    
+    # وحدات ركنة علوية
+    CORNER_L_WALL = "corner_l_wall"  # ركنة L علوي متساوية الاضلع
+    CORNER_45_WALL = "corner_45_wall"  # ركنة 45 علوي
+    
+    # دواليب
+    TALL_DOORS = "tall_doors"  # دولاب ضلفة سفلي و علوي
+    TALL_DOORS_SIDE_PANEL = "tall_doors_side_panel"  # دولاب ضلفة سفلي و علوي جنب عيرة
+    TALL_DOORS_APPLIANCES = "tall_doors_appliances"  # دولاب ضلف + أجهزة
+    TALL_DOORS_APPLIANCES_SIDE_PANEL = "tall_doors_appliances_side_panel"  # دولاب ضلف + اجهزة جنب عيرة
+    
+    TALL_DRAWERS_SIDE_DOORS_TOP = "tall_drawers_side_doors_top"  # دولاب ادراج (م)جانبية + ضلف علوية
+    TALL_DRAWERS_SIDE_DOORS_TOP_SIDE_PANEL = "tall_drawers_side_doors_top_side_panel"  # دولاب ادراج (م)جانبية + ضلف علوية جنب عيرة
+    TALL_DRAWERS_BOTTOM_DOORS_TOP = "tall_drawers_bottom_doors_top"  # دولاب ادراج (م)سفلية + ضلف علوية
+    TALL_DRAWERS_BOTTOM_DOORS_TOP_SIDE_PANEL = "tall_drawers_bottom_doors_top_side_panel"  # دولاب ادراج (م)سفلية + ضلف علوية جنب عيرة
+    
+    TALL_DRAWERS_SIDE_APPLIANCES_DOORS = "tall_drawers_side_appliances_doors"  # دولاب ادراج م جانبية+أجهزة + ضلف
+    TALL_DRAWERS_SIDE_APPLIANCES_DOORS_SIDE_PANEL = "tall_drawers_side_appliances_doors_side_panel"  # دولاب ادراج م جانبية + أجهزة + ضلف جنب عيرة
+    TALL_DRAWERS_BOTTOM_APPLIANCES_DOORS_TOP = "tall_drawers_bottom_appliances_doors_top"  # دولاب ادراج م سفلية+أجهزة + ضلف علوية
+    TALL_DRAWERS_BOTTOM_APPLIANCES_DOORS_TOP_SIDE_PANEL = "tall_drawers_bottom_appliances_doors_top_side_panel"  # دولاب ادراج م سفلية + أجهزة + ضلف علوية جنب عيرة
+    
+    # أدراج خاصة
+    TWO_SMALL_20_ONE_LARGE_SIDE = "two_small_20_one_large_side"  # 2درج صغير20سم + درج كبير م جانبية
+    TWO_SMALL_20_ONE_LARGE_BOTTOM = "two_small_20_one_large_bottom"  # 2درج صغير20سم + درج كبير م سفلية
+    ONE_SMALL_16_TWO_LARGE_SIDE = "one_small_16_two_large_side"  # درج صغير 16 سم + 2 درج كبير م جانبية
+    ONE_SMALL_16_TWO_LARGE_BOTTOM = "one_small_16_two_large_bottom"  # درج صغير 16 سم + 2 درج كبير م سفلية
+    
+    # متفرقات
+    SIDE_FLUSH = "side_flush"  # جنب لطش
+    WALL_MICROWAVE = "wall_microwave"  # علوي بها ميكرويف
+    WALL_MICROWAVE_SIDE_PANEL = "wall_microwave_side_panel"  # علوي بها ميكرويف جنب عيرة
+    WARDROBE_WOODEN_BASE = "wardrobe_wooden_base"  # بلاكار قاعدة خشبية
+
+class DoorType(str, Enum):
+    """نوع الضلفة"""
+    HINGED = "hinged"  # مفصلي
+    FLIP = "flip"  # قلاب
 
 class EdgeDistribution(BaseModel):
     """توزيع الشريط على الحواف"""
@@ -30,14 +95,26 @@ class Part(BaseModel):
 
 class UnitCalculateRequest(BaseModel):
     """طلب حساب الوحدة"""
-    type: UnitType = Field(description="نوع الوحدة: ground, wall, double_door, sink_ground")
+    type: UnitType = Field(description="نوع الوحدة")
     width_cm: float = Field(gt=0, description="عرض الوحدة بالسنتيمتر")
+    width_2_cm: float = Field(default=0.0, ge=0, description="عرض 2 للوحدات الركنة بالسنتيمتر")
     height_cm: float = Field(gt=0, description="ارتفاع الوحدة بالسنتيمتر")
     depth_cm: float = Field(gt=0, description="عمق الوحدة بالسنتيمتر")
-    shelf_count: int = Field(ge=0, description="عدد الرفوف")
+    depth_2_cm: float = Field(default=0.0, ge=0, description="عمق 2 للوحدات الركنة بالسنتيمتر")
+    shelf_count: int = Field(default=2, ge=0, description="عدد الرفوف (افتراضي 2)")
+    door_count: int = Field(default=2, ge=0, description="عدد الضلف (افتراضي 2)")
+    door_type: DoorType = Field(default=DoorType.HINGED, description="نوع الضلفة: hinged (مفصلي) أو flip (قلاب)")
+    flip_door_height: float = Field(default=0.0, ge=0, description="ارتفاع ضلفة القلاب (للوحدات التي تحتوي على قلاب)")
+    bottom_door_height: float = Field(default=0.0, ge=0, description="ارتفاع الضلفة السفلية (للوحدات الطويلة)")
+    oven_height: float = Field(default=60.0, ge=0, description="ارتفاع الفرن بالسنتيمتر")
+    microwave_height: float = Field(default=35.0, ge=0, description="ارتفاع الميكرويف بالسنتيمتر")
+    vent_height: float = Field(default=10.0, ge=0, description="ارتفاع الهواية بالسنتيمتر")
+    drawer_count: int = Field(default=0, ge=0, description="عدد الأدراج (افتراضي 0)")
+    drawer_height_cm: float = Field(default=20.0, gt=0, description="ارتفاع الدرج بالسنتيمتر (افتراضي 20)")
+    fixed_part_cm: float = Field(default=0.0, ge=0, description="الجزء الثابت بالسنتيمتر (للوحدات الثابتة)")
     options: Optional[Dict[str, Any]] = Field(
         default_factory=dict,
-        description="خيارات إضافية (board_thickness_cm, back_clearance_cm, etc.)"
+        description="خيارات إضافية"
     )
 
 class UnitCalculateResponse(BaseModel):
@@ -63,11 +140,23 @@ class UnitCalculateResponse(BaseModel):
 
 class UnitEstimateRequest(BaseModel):
     """طلب تقدير تكلفة الوحدة"""
-    type: UnitType = Field(description="نوع الوحدة: ground, wall, double_door, sink_ground")
+    type: UnitType = Field(description="نوع الوحدة")
     width_cm: float = Field(gt=0)
+    width_2_cm: float = Field(default=0.0, ge=0)
     height_cm: float = Field(gt=0)
     depth_cm: float = Field(gt=0)
-    shelf_count: int = Field(ge=0)
+    depth_2_cm: float = Field(default=0.0, ge=0)
+    shelf_count: int = Field(default=2, ge=0)
+    door_count: int = Field(default=2, ge=0)
+    door_type: DoorType = Field(default=DoorType.HINGED)
+    flip_door_height: float = Field(default=0.0, ge=0)
+    bottom_door_height: float = Field(default=0.0, ge=0)
+    oven_height: float = Field(default=60.0, ge=0)
+    microwave_height: float = Field(default=35.0, ge=0)
+    vent_height: float = Field(default=10.0, ge=0)
+    drawer_count: int = Field(default=0, ge=0)
+    drawer_height_cm: float = Field(default=20.0, gt=0)
+    fixed_part_cm: float = Field(default=0.0, ge=0)
     options: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 class UnitEstimateResponse(BaseModel):

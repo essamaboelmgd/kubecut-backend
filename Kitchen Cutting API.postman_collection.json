@@ -1,9 +1,11 @@
 {
 	"info": {
-		"_postman_id": "kitchen-cutting-api-collection",
+		"_postman_id": "17dbb9ae-c3ba-4a47-8193-9f8a51ebdc9e",
 		"name": "Kitchen Cutting API",
+		"description": "API collection for Kitchen Cabinet Calculator - Cutting and estimation service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"description": "API collection for Kitchen Cabinet Calculator - Cutting and estimation service"
+		"_exporter_id": "50288910",
+		"_collection_link": "https://essam-abo-elmgd-s-team.postman.co/workspace/Essam-Abo-Elmgd's-Workspace~d8235e0c-0875-4360-8fc8-54001cd6959d/collection/50288910-17dbb9ae-c3ba-4a47-8193-9f8a51ebdc9e?action=share&source=collection_link&creator=50288910"
 	},
 	"item": [
 		{
@@ -21,7 +23,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"full_name\": \"Test User\",\n  \"role\": \"user\"\n}"
+							"raw": "{\n  \"phone\": \"01062772290\",\n  \"password\": \"12345678\",\n  \"full_name\": \"Postman Admin\",\n  \"role\": \"admin\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/register",
@@ -49,7 +51,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"device_id\": \"device123\",\n  \"device_name\": \"My PC\"\n}"
+							"raw": "{\n  \"email\": \"essam1@gmail.com\",\n  \"password\": \"12345678\",\n  \"device_id\": \"device123\",\n  \"device_name\": \"My PC\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
@@ -200,12 +202,12 @@
 								"settings"
 							]
 						},
-						"description": "Get current application settings"
+						"description": "Get current application settings including assembly method, handle type, and all numeric configuration values"
 					},
 					"response": []
 				},
 				{
-					"name": "Update Settings",
+					"name": "Update Settings - Assembly Method (Full Sides Back Routed)",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -216,7 +218,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"assembly_method\": \"bolt\",\n  \"handle_type\": \"built-in\",\n  \"handle_recess_height_mm\": 30,\n  \"default_board_thickness_mm\": 16,\n  \"back_panel_thickness_mm\": 3,\n  \"edge_overlap_mm\": 2,\n  \"back_clearance_mm\": 3,\n  \"top_clearance_mm\": 5,\n  \"bottom_clearance_mm\": 5,\n  \"side_overlap_mm\": 0,\n  \"sheet_size_m2\": 2.4,\n  \"materials\": {\n    \"plywood_sheet\": {\n      \"price_per_sheet\": 2500,\n      \"sheet_size_m2\": 2.4\n    },\n    \"edge_band_per_meter\": {\n      \"price_per_meter\": 10\n    }\n  }\n}"
+							"raw": "{\n  \"assembly_method\": \"full_sides_back_routed\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/settings",
@@ -227,7 +229,88 @@
 								"settings"
 							]
 						},
-						"description": "Update application settings"
+						"description": "Update assembly method to: جانبين كاملين (ظهر مفحار)\n\nAvailable options:\n- full_sides_back_routed (جانبين كاملين - ظهر مفحار)\n- full_base_back_routed (أرضية كاملة ظهر مفحار)\n- base_full_top_sides_back_routed (ارضي قاعدة كاملة + علوي جانبين كاملين ظهر مفحار)\n- full_sides_back_flush (جانبين كاملين - ظهر لطش)\n- full_base_back_flush (أرضية كاملة - ظهر لطش)\n- base_full_top_sides_back_flush (ارضي قاعدة كاملة + علوي جانبين كاملين ظهر لطش)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Settings - Handle Type (Built In)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"handle_type\": \"built_in\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/settings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"settings"
+							]
+						},
+						"description": "Update handle type to: مقبض بيلت ان\n\nAvailable options:\n- built_in (مقبض بيلت ان)\n- regular (مقبض عادي)\n- hidden_cl_chassis (مقبض ارضي مخفي C-L علوي شاسية)\n- hidden_cl_drop (مقبض ارضي مخفي C-L علوي ساقط)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Settings - Multiple Numeric Values",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"handle_profile_height\": 4.0,\n  \"mirror_width\": 10.0,\n  \"shelf_depth_deduction\": 6.0,\n  \"counter_thickness\": 2.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/settings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"settings"
+							]
+						},
+						"description": "Update multiple numeric settings at once. All values are in centimeters (cm)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Settings - All Fields Example",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"assembly_method\": \"full_sides_back_routed\",\n  \"handle_type\": \"built_in\",\n  \"handle_profile_height\": 3.5,\n  \"chassis_handle_drop\": 2.0,\n  \"counter_thickness\": 1.8,\n  \"mirror_width\": 8.0,\n  \"back_deduction\": 2.0,\n  \"router_depth\": 0.9,\n  \"router_distance\": 2.0,\n  \"router_thickness\": 0.5,\n  \"door_width_deduction_no_edge\": 0.4,\n  \"shelf_depth_deduction\": 5.0,\n  \"ground_door_height_deduction_no_edge\": 1.0,\n  \"edge_banding_waste_per_size\": 6.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/settings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"settings"
+							]
+						},
+						"description": "Update all settings fields with default values. All numeric values are in centimeters (cm)."
 					},
 					"response": []
 				}
@@ -253,7 +336,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"type\": \"ground\",\n  \"width_cm\": 60,\n  \"height_cm\": 72,\n  \"depth_cm\": 30,\n  \"shelf_count\": 2,\n  \"options\": {}\n}"
+							"raw": "{\n  \"type\": \"ground\",\n  \"width_cm\": 90,\n  \"height_cm\": 80,\n  \"depth_cm\": 58,\n  \"shelf_count\": 2,\n  \"door_count\": 2,\n  \"options\": {}\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/units/calculate",
@@ -265,7 +348,40 @@
 								"calculate"
 							]
 						},
-						"description": "Calculate unit parts and dimensions"
+						"description": "Calculate unit parts and dimensions for ground unit (ارضي)"
+					},
+					"response": []
+				},
+				{
+					"name": "Calculate Sink Unit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"sink\",\n  \"width_cm\": 90,\n  \"height_cm\": 80,\n  \"depth_cm\": 58,\n  \"shelf_count\": 2,\n  \"door_count\": 2,\n  \"options\": {}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/units/calculate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"units",
+								"calculate"
+							]
+						},
+						"description": "Calculate unit parts for sink unit (حوض) - has front mirror only, no back panel"
 					},
 					"response": []
 				},

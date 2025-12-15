@@ -12,9 +12,9 @@ from app.models.internal_counter import (
     InternalCounterOptions
 )
 from app.models.edge_band import EdgeBreakdownResponse, EdgeType
-from app.services.unit_calculator import (
-    calculate_unit_parts, 
-    calculate_total_edge_band, 
+from app.services.unit_calculators import (
+    calculate_unit_parts,
+    calculate_total_edge_band,
     calculate_total_area,
     calculate_material_usage
 )
@@ -142,11 +142,23 @@ async def calculate_unit(request: UnitCalculateRequest, authorization: str = Hea
         
         # Calculate parts (convert cm to mm for calculation)
         parts = calculate_unit_parts(
-            unit_type=request.type,
+            unit_type=request.type.value,
             width_cm=request.width_cm,
             height_cm=request.height_cm,
             depth_cm=request.depth_cm,
             shelf_count=request.shelf_count,
+            door_count=request.door_count,
+            door_type=request.door_type.value,
+            flip_door_height=request.flip_door_height,
+            bottom_door_height=request.bottom_door_height,
+            oven_height=request.oven_height,
+            microwave_height=request.microwave_height,
+            vent_height=request.vent_height,
+            width_2_cm=request.width_2_cm,
+            depth_2_cm=request.depth_2_cm,
+            drawer_count=request.drawer_count,
+            drawer_height_cm=request.drawer_height_cm,
+            fixed_part_cm=request.fixed_part_cm,
             settings=settings
         )
         
@@ -219,11 +231,23 @@ async def estimate_unit_cost(request: UnitEstimateRequest, authorization: str = 
         
         # Calculate parts (convert cm to mm for calculation)
         parts = calculate_unit_parts(
-            unit_type=request.type,
+            unit_type=request.type.value,
             width_cm=request.width_cm,
             height_cm=request.height_cm,
             depth_cm=request.depth_cm,
             shelf_count=request.shelf_count,
+            door_count=request.door_count,
+            door_type=request.door_type.value,
+            flip_door_height=request.flip_door_height,
+            bottom_door_height=request.bottom_door_height,
+            oven_height=request.oven_height,
+            microwave_height=request.microwave_height,
+            vent_height=request.vent_height,
+            width_2_cm=request.width_2_cm,
+            depth_2_cm=request.depth_2_cm,
+            drawer_count=request.drawer_count,
+            drawer_height_cm=request.drawer_height_cm,
+            fixed_part_cm=request.fixed_part_cm,
             settings=settings
         )
         
@@ -400,11 +424,23 @@ async def save_unit(request: UnitCalculateRequest, authorization: str = Header(N
         
         # Calculate parts (convert cm to mm for calculation)
         parts = calculate_unit_parts(
-            unit_type=request.type,
+            unit_type=request.type.value,
             width_cm=request.width_cm,
             height_cm=request.height_cm,
             depth_cm=request.depth_cm,
             shelf_count=request.shelf_count,
+            door_count=request.door_count,
+            door_type=request.door_type.value,
+            flip_door_height=request.flip_door_height,
+            bottom_door_height=request.bottom_door_height,
+            oven_height=request.oven_height,
+            microwave_height=request.microwave_height,
+            vent_height=request.vent_height,
+            width_2_cm=request.width_2_cm,
+            depth_2_cm=request.depth_2_cm,
+            drawer_count=request.drawer_count,
+            drawer_height_cm=request.drawer_height_cm,
+            fixed_part_cm=request.fixed_part_cm,
             settings=settings
         )
         

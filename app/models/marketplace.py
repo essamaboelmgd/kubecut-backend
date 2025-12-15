@@ -6,6 +6,7 @@ from enum import Enum
 class ItemStatus(str, Enum):
     """حالة المنتج"""
     AVAILABLE = "available"  # متاح للبيع
+    PENDING = "pending"     # في انتظار الموافقة
     SOLD = "sold"           # تم البيع
     RESERVED = "reserved"   # محجوز
 
