@@ -258,3 +258,55 @@ async def get_user_units_count(user_id: str, period_days: int = 30) -> int:
     })
     
     return count
+
+async def delete_user(user_id: str) -> bool:
+    """Delete a user (admin only)"""
+    db = get_database()
+    if db is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection not available"
+        )
+    
+    result = await db.users.delete_one({"_id": user_id})
+    return result.deleted_count > 0
+
+async def update_user_role(user_id: str, role: UserRole) -> bool:
+    """Update user role (admin only)"""
+    db = get_database()
+    if db is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database connection not available"
+        )
+    
+    # Update subscription based on new role
+    subscription_update = {}
+    if role == UserRole.ADMIN:
+        subscription_update = {
+            "max_units_per_month": 1000,
+            "max_devices": 5,
+            "is_unlimited_units": True,
+            "is_unlimited_devices": True
+        }
+    else:
+        # Revert to default user limits
+        subscription_update = {
+            "max_units_per_month": 3,
+            "max_devices": 1,
+            "is_unlimited_units": False,
+            "is_unlimited_devices": False
+        }
+    
+    result = await db.users.update_one(
+        {"_id": user_id},
+        {
+            "$set": {
+                "role": role, 
+                "subscription": subscription_update,
+                "updated_at": datetime.utcnow()
+            }
+        }
+    )
+    
+    return result.modified_count > 0

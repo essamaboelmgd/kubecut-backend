@@ -8,7 +8,8 @@ from app.models.auth import (
 )
 from app.services.auth_service import (
     create_user, authenticate_user, get_user_by_id, 
-    update_user_subscription, deactivate_device, get_user_units_count
+    update_user_subscription, deactivate_device, get_user_units_count,
+    delete_user, update_user_role
 )
 from app.services.auth_service import TokenData
 import jwt
