@@ -28,7 +28,23 @@ async def upload_image(
     # Create unique filename
     file_extension = os.path.splitext(file.filename)[1]
     filename = f"{uuid.uuid4()}{file_extension}"
+    filename = f"{uuid.uuid4()}{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, filename)
+    
+    # Check file size (10 MB limit)
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB in bytes
+    
+    # Move cursor to end to get size
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    # Reset cursor to start
+    file.file.seek(0)
+    
+    if file_size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File size too large. Maximum size is 10 MB."
+        )
     
     # Save file
     with open(file_path, "wb") as buffer:

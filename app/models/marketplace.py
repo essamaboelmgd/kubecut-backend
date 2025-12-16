@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -19,6 +19,12 @@ class MarketplaceItemCreate(BaseModel):
     unit: str = Field(default="item", description="وحدة القياس (مثلا: قطعة، متر، لوح)")
     images: List[str] = Field(default_factory=list, description="روابط صور المنتج")
     location: Optional[str] = Field(default="", description="المعيشة / العنوان")
+    
+    @validator('images')
+    def validate_images_count(cls, v):
+        if len(v) > 3:
+            raise ValueError('لا يمكن إضافة أكثر من 3 صور للمنتج')
+        return v
 
 class MarketplaceItemUpdate(BaseModel):
     """طلب تحديث منتج"""
@@ -30,6 +36,12 @@ class MarketplaceItemUpdate(BaseModel):
     images: Optional[List[str]] = None
     status: Optional[ItemStatus] = None
     location: Optional[str] = None
+    
+    @validator('images')
+    def validate_images_count(cls, v):
+        if v is not None and len(v) > 3:
+            raise ValueError('لا يمكن إضافة أكثر من 3 صور للمنتج')
+        return v
 
 class MarketplaceItemResponse(BaseModel):
     """عرض بيانات المنتج"""
