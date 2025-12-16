@@ -2,7 +2,7 @@ from typing import List, Optional
 from datetime import datetime
 from uuid import uuid4
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from app.models.ads import AdCreate, AdDocument, AdLocation
+from app.models.ads import AdCreate, AdUpdate, AdDocument, AdLocation
 from app.database import get_database
 
 class AdsService:
@@ -22,10 +22,30 @@ class AdsService:
         await self.collection.insert_one(ad_doc.model_dump(by_alias=True))
         return ad_doc
 
+    async def update_ad(self, ad_id: str, update_data: AdUpdate) -> Optional[AdDocument]:
+        ad = await self.collection.find_one({"_id": ad_id})
+        if not ad:
+            return None
+            
+        update_dict = update_data.model_dump(exclude_unset=True)
+        if not update_dict:
+            return AdDocument(**ad)
+            
+        update_dict["updated_at"] = datetime.utcnow()
+        
+        await self.collection.update_one(
+            {"_id": ad_id},
+            {"$set": update_dict}
+        )
+        
+        updated_doc = await self.collection.find_one({"_id": ad_id})
+        return AdDocument(**updated_doc)
+
     async def get_ads(self, location: Optional[AdLocation] = None, active_only: bool = True) -> List[AdDocument]:
         query = {}
         if location:
-            query["location"] = location
+            # MongoDB finds documents where 'locations' array contains the specific 'location' value
+            query["locations"] = location
         if active_only:
             query["is_active"] = True
             
@@ -34,6 +54,12 @@ class AdsService:
         
         ads = []
         async for doc in cursor:
+            # Handle migration/compatibility if needed: if 'locations' missing, try 'location'
+            if "locations" not in doc and "location" in doc:
+                doc["locations"] = [doc["location"]]
+            elif "locations" not in doc:
+                doc["locations"] = []
+                
             ads.append(AdDocument(**doc))
         return ads
 
@@ -42,6 +68,12 @@ class AdsService:
         cursor = self.collection.find({}).sort("created_at", -1)
         ads = []
         async for doc in cursor:
+            # Migration/Compat
+            if "locations" not in doc and "location" in doc:
+                doc["locations"] = [doc["location"]]
+            elif "locations" not in doc:
+                doc["locations"] = []
+                
             ads.append(AdDocument(**doc))
         return ads
 
@@ -61,6 +93,10 @@ class AdsService:
         )
         
         updated_doc = await self.collection.find_one({"_id": ad_id})
+        # Migration/Compat
+        if "locations" not in updated_doc and "location" in updated_doc:
+            updated_doc["locations"] = [updated_doc["location"]]
+            
         return AdDocument(**updated_doc)
 
 # Helper
