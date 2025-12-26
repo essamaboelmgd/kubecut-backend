@@ -35,9 +35,20 @@ def calculate_ground_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    # العرض = العمق، الطول = العرض - (سمك الجنبين)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    # التحقق من طريقة التجميع
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة (Ground Base Full)
+        # العرض = العمق
+        # الطول = العرض الكلي (Full Width)
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين (Full Sides) - الافتراضي
+        # العرض = العمق
+        # الطول = العرض - (سمك الجنبين)
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",  # القاعدة
         width_cm=base_width,
@@ -70,9 +81,18 @@ def calculate_ground_unit(
     ))
     
     # 4. الجانبين (Side Panels)
-    # العرض = العمق، الطول = الارتفاع
+    # العرض = العمق
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة -> الجناب تقف فوق القاعدة
+        # الطول = الارتفاع - سمك القاعدة
+        side_height = height_cm - board_thickness
+    else:
+        # تجميع بجانبين كاملين -> الجناب كاملة للارتفاع
+        # الطول = الارتفاع
+        side_height = height_cm
+        
     parts.append(Part(
         name="side_panel",  # الجانب
         width_cm=side_width,
@@ -166,8 +186,15 @@ def calculate_sink_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",  # القاعدة
         width_cm=base_width,
@@ -191,7 +218,14 @@ def calculate_sink_unit(
     
     # 3. الجانبين (Side Panels)
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # الجناب تقف فوق القاعدة
+        side_height = height_cm - board_thickness
+    else:
+        # الجناب كاملة
+        side_height = height_cm
+        
     parts.append(Part(
         name="side_panel",  # الجانب
         width_cm=side_width,
@@ -267,8 +301,15 @@ def calculate_drawers_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",
         width_cm=base_width,
@@ -302,7 +343,14 @@ def calculate_drawers_unit(
     
     # 4. الجانبين (Side Panels)
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # الجناب تقف فوق القاعدة
+        side_height = height_cm - board_thickness
+    else:
+        # الجناب كاملة
+        side_height = height_cm
+
     parts.append(Part(
         name="side_panel",
         width_cm=side_width,
@@ -404,8 +452,15 @@ def calculate_drawers_bottom_rail_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",
         width_cm=base_width,
@@ -439,7 +494,14 @@ def calculate_drawers_bottom_rail_unit(
     
     # 4. الجانبين (Side Panels)
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # الجناب تقف فوق القاعدة
+        side_height = height_cm - board_thickness
+    else:
+        # الجناب كاملة
+        side_height = height_cm
+
     parts.append(Part(
         name="side_panel",
         width_cm=side_width,
@@ -688,8 +750,15 @@ def calculate_ground_fixed_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",
         width_cm=base_width,
@@ -723,7 +792,14 @@ def calculate_ground_fixed_unit(
     
     # 4. الجانبين (Side Panels)
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # الجناب تقف فوق القاعدة
+        side_height = height_cm - board_thickness
+    else:
+        # الجناب كاملة
+        side_height = height_cm
+
     parts.append(Part(
         name="side_panel",
         width_cm=side_width,
@@ -848,8 +924,15 @@ def calculate_sink_fixed_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",
         width_cm=base_width,
@@ -873,7 +956,13 @@ def calculate_sink_fixed_unit(
     
     # 3. الجانبين (Side Panels)
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # الجناب تقف فوق القاعدة
+        side_height = height_cm - board_thickness
+    else:
+        # الجناب كاملة
+        side_height = height_cm
     parts.append(Part(
         name="side_panel",
         width_cm=side_width,
@@ -1385,8 +1474,15 @@ def calculate_tall_doors_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة وسقف كامل
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",
         width_cm=base_width,
@@ -1397,8 +1493,15 @@ def calculate_tall_doors_unit(
     ))
     
     # 2. برنيطة / سقف الوحدة (Top/Ceiling)
-    top_width = depth_cm
-    top_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # سقف كامل
+        top_width = depth_cm
+        top_length = width_cm
+    else:
+        # سقف بين الجنبين
+        top_width = depth_cm
+        top_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="top_ceiling",
         width_cm=top_width,
@@ -1410,7 +1513,14 @@ def calculate_tall_doors_unit(
     
     # 3. الجانبين (Side Panels)
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # الجناب بين القاعدة والسقف
+        side_height = height_cm - (board_thickness * 2)
+    else:
+        # الجناب كاملة
+        side_height = height_cm
+
     parts.append(Part(
         name="side_panel",
         width_cm=side_width,
@@ -1707,8 +1817,15 @@ def calculate_tall_doors_appliances_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة وسقف كامل
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",
         width_cm=base_width,
@@ -1719,8 +1836,15 @@ def calculate_tall_doors_appliances_unit(
     ))
     
     # 2. برنيطة / سقف الوحدة (Top/Ceiling)
-    top_width = depth_cm
-    top_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # سقف كامل
+        top_width = depth_cm
+        top_length = width_cm
+    else:
+        # سقف بين الجنبين
+        top_width = depth_cm
+        top_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="top_ceiling",
         width_cm=top_width,
@@ -1732,7 +1856,14 @@ def calculate_tall_doors_appliances_unit(
     
     # 3. جنب 1 (Side 1)
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # الجناب بين القاعدة والسقف
+        side_height = height_cm - (board_thickness * 2)
+    else:
+        # الجناب كاملة
+        side_height = height_cm
+
     parts.append(Part(
         name="side_1",
         width_cm=side_width,
@@ -1948,8 +2079,15 @@ def calculate_tall_drawers_side_doors_top_unit(
     board_thickness = DEFAULT_BOARD_THICKNESS
     
     # 1. القاعدة (Base)
-    base_width = depth_cm
-    base_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # تجميع بقاعدة كاملة وسقف كامل
+        base_width = depth_cm
+        base_length = width_cm
+    else:
+        # تجميع بجانبين كاملين
+        base_width = depth_cm
+        base_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="base",
         width_cm=base_width,
@@ -1960,8 +2098,15 @@ def calculate_tall_drawers_side_doors_top_unit(
     ))
     
     # 2. برنيطة / سقف الوحدة (Top/Ceiling)
-    top_width = depth_cm
-    top_length = width_cm - (board_thickness * 2)
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # سقف كامل
+        top_width = depth_cm
+        top_length = width_cm
+    else:
+        # سقف بين الجنبين
+        top_width = depth_cm
+        top_length = width_cm - (board_thickness * 2)
+        
     parts.append(Part(
         name="top_ceiling",
         width_cm=top_width,
@@ -1973,7 +2118,14 @@ def calculate_tall_drawers_side_doors_top_unit(
     
     # 3. الجانبين (Side Panels)
     side_width = depth_cm
-    side_height = height_cm
+    
+    if settings.assembly_method == "base_full_top_sides_back_routed":
+        # الجناب بين القاعدة والسقف
+        side_height = height_cm - (board_thickness * 2)
+    else:
+        # الجناب كاملة
+        side_height = height_cm
+
     parts.append(Part(
         name="side_panel",
         width_cm=side_width,
