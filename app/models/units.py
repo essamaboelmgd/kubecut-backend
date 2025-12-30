@@ -42,6 +42,9 @@ class UnitType(str, Enum):
     CORNER_L_WALL = "corner_l_wall"  # ركنة L علوي متساوية الاضلع
     CORNER_45_WALL = "corner_45_wall"  # ركنة 45 علوي
     
+    # وحدات علوية خاصة
+    WALL_MICROWAVE = "wall_microwave"  # علوي بها ميكرويف
+    
     # دواليب
     TALL_DOORS = "tall_doors"  # دولاب ضلفة سفلي و علوي
     TALL_DOORS_SIDE_PANEL = "tall_doors_side_panel"  # دولاب ضلفة سفلي و علوي جنب عيرة
@@ -58,6 +61,13 @@ class UnitType(str, Enum):
     TALL_DRAWERS_BOTTOM_APPLIANCES_DOORS_TOP = "tall_drawers_bottom_appliances_doors_top"  # دولاب ادراج م سفلية+أجهزة + ضلف علوية
     TALL_DRAWERS_BOTTOM_APPLIANCES_DOORS_TOP_SIDE_PANEL = "tall_drawers_bottom_appliances_doors_top_side_panel"  # دولاب ادراج م سفلية + أجهزة + ضلف علوية جنب عيرة
     
+    TALL_WOODEN_BASE = "tall_wooden_base"  # بلاكار قاعدة خشبية
+    TALL_DRAWERS_BOTTOM_RAIL_TOP_DOORS = "tall_drawers_bottom_rail_top_doors"  # دولاب ادراج مجرى سفلية + ضلف علوية
+
+    THREE_TURBO = "three_turbo"  # وحدة 3 تربو
+    DRAWER_BUILT_IN_OVEN = "drawer_built_in_oven"  # وحدة درج + فرن بيلت ان
+    DRAWER_BOTTOM_RAIL_BUILT_IN_OVEN = "drawer_bottom_rail_built_in_oven"  # وحدة درج مجره سفلية+ فرن بيلت    TALL_DRAWERS_BOTTOM_RAIL_TOP_DOORS = "tall_drawers_bottom_rail_top_doors"  # دولاب ادراج مجرى سفلية + ضلف علوية
+
     # أدراج خاصة
     TWO_SMALL_20_ONE_LARGE_SIDE = "two_small_20_one_large_side"  # 2درج صغير20سم + درج كبير م جانبية
     TWO_SMALL_20_ONE_LARGE_BOTTOM = "two_small_20_one_large_bottom"  # 2درج صغير20سم + درج كبير م سفلية
