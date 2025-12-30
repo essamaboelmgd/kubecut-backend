@@ -763,6 +763,17 @@ def calculate_unit_parts(
                 # إعادة حساب المساحة
                 part.area_m2 = round((part.width_cm * part.height_cm) / 10000, 4)
 
+    # حساب متر الشريط لكل قطعة بناءً على الأبعاد (بعد الخصم إن وجد) وتوزيع الشريط
+    for part in parts:
+        if part.edge_distribution:
+            perimeter_cm = 0
+            if part.edge_distribution.top: perimeter_cm += part.width_cm
+            if part.edge_distribution.bottom: perimeter_cm += part.width_cm
+            if part.edge_distribution.left: perimeter_cm += part.height_cm
+            if part.edge_distribution.right: perimeter_cm += part.height_cm
+            
+            part.edge_band_m = round(perimeter_cm / 100, 3)
+
     return parts
 
 
