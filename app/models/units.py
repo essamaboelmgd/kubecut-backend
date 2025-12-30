@@ -76,7 +76,6 @@ class UnitType(str, Enum):
     
     # متفرقات
     SIDE_FLUSH = "side_flush"  # جنب لطش
-    WALL_MICROWAVE = "wall_microwave"  # علوي بها ميكرويف
     WALL_MICROWAVE_SIDE_PANEL = "wall_microwave_side_panel"  # علوي بها ميكرويف جنب عيرة
     WARDROBE_WOODEN_BASE = "wardrobe_wooden_base"  # بلاكار قاعدة خشبية
 
